@@ -1,0 +1,11 @@
+chatty/build/*
+chatty/dist/run*
+chatty/jars/*
+chatty/nbproject/*
+chatty/derby.log
+
+chatty_server/chatty/build/*
+chatty_server/chatty/dist/run*
+chatty_server/chatty/jars/*
+chatty_server/chatty/nbproject/*
+chatty_server/chatty/derby.log
