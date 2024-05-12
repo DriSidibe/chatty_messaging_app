@@ -286,6 +286,9 @@ public class HomeController implements Initializable {
         for (Message message : messages_betwee_me_and_friend) {
             add_new_message_to_conversation(message);
         }
+        if (messagesByFrien.containsKey(GlobalState.currentDiscussingFriend)) {
+            messagesByFrien.get(GlobalState.currentDiscussingFriend).addAll(messages_betwee_me_and_friend);
+        }
         allMessages.addAll(messages_betwee_me_and_friend);
         GlobalState.lastMessage.setMessage(allMessages.get(allMessages.size()-1));
     }
