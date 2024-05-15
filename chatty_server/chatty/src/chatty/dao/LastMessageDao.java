@@ -32,8 +32,8 @@ public class LastMessageDao {
         lastMessageJpaController.edit(lastMessage);
     }
 
-    public LastMessage getLastMessage(Client client){
-        return lastMessageJpaController.findLastMessage(client);
+    public LastMessage getLastMessage(Client client1, Client client2){
+        return lastMessageJpaController.findLastMessage(client1, client2);
     }
 
     public List<LastMessage> getLastMessage(){

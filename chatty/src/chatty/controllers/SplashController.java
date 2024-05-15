@@ -37,7 +37,7 @@ public class SplashController implements Initializable {
     private Label info_msg;
     private final Preferences prefs = Preferences.userRoot().node("chatty");
     
-    String server = "localhost";
+    String server = System.getenv("chattyServer");;
     int port = 1099;
     int retryWaitTime = 2000;
     boolean isConnectionToServerOk = false;

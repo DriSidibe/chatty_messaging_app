@@ -38,7 +38,7 @@ public interface Chatty_service_interface extends Remote {
     public List<Status> getStatus() throws RemoteException;
     public void createNewLastMessage(LastMessage lastMessage) throws RemoteException;
     public void editLastMessage(LastMessage lastMessage) throws RemoteException;
-    public LastMessage getLastMessage(Client client) throws RemoteException;
+    public LastMessage getLastMessage(Client client1, Client client2) throws RemoteException;
     public List<LastMessage> getLastMessage() throws RemoteException;
-    public List<Message> getMessagesAfter(Date date) throws RemoteException;
+    public List<Message> getMessagesAfter(int id) throws RemoteException;
 }

@@ -58,8 +58,10 @@ public class Client implements Serializable {
     private List<Message> messageList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "postBy")
     private List<Message> messageList1;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "ownerLastMessage")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner2")
     private List<LastMessage> lastMessageList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner1")
+    private List<LastMessage> lastMessageList1;
 
     public Client() {
     }
@@ -68,6 +70,14 @@ public class Client implements Serializable {
         this.id = id;
     }
 
+    public Client(Integer id, String firstname, String lastname, String username, String password) {
+        this.id = id;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.username = username;
+        this.password = password;
+    }
+    
     public Client(String firstname, String lastname, String username, String password) {
         this.firstname = firstname;
         this.lastname = lastname;
@@ -140,6 +150,15 @@ public class Client implements Serializable {
 
     public void setLastMessageList(List<LastMessage> lastMessageList) {
         this.lastMessageList = lastMessageList;
+    }
+
+    @XmlTransient
+    public List<LastMessage> getLastMessageList1() {
+        return lastMessageList1;
+    }
+
+    public void setLastMessageList1(List<LastMessage> lastMessageList1) {
+        this.lastMessageList1 = lastMessageList1;
     }
 
     @Override

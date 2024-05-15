@@ -298,15 +298,15 @@ public class MessageJpaController implements Serializable {
         return (!messages.isEmpty() ? messages.get(0) : null);
     }
     
-    public List<Message> findMessageEntities(Date date) {
+    public List<Message> findMessageEntities(int id) {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("chattyPU");
         EntityManager em = emf.createEntityManager();
 
         em.getTransaction().begin();
 
         // Création et exécution d'une requête SQL native personnalisée
-        Query query = em.createNativeQuery("SELECT * FROM message WHERE post_at > ?", Message.class);
-        query.setParameter(1, date);
+        Query query = em.createNativeQuery("SELECT * FROM message WHERE id > ?", Message.class);
+        query.setParameter(1, id);
 
         // Récupération des résultats de la requête
         List<Message> messages = query.getResultList();
@@ -317,4 +317,5 @@ public class MessageJpaController implements Serializable {
         emf.close();
         return messages;
     }
+    
 }

@@ -5,6 +5,7 @@
 package chatty.controllers;
 
 import chatty.models.Client;
+import chatty.models.LastMessage;
 import chatty.models.Message;
 import chatty.models.Status;
 import chatty.my_classes.GlobalState;
@@ -25,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -82,6 +84,7 @@ public class HomeController implements Initializable {
     Map<Client, List<Message>> messagesByFrien = new HashMap<>();
     Client oldFriendSelected = new Client("firstname", "lastname", "username", "password");
     Timer timer = new Timer();
+    Date currentSendedMessageDate = null;
 
     /**
      * Initializes the controller class.
@@ -89,35 +92,44 @@ public class HomeController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
-            GlobalState.lastMessage = GlobalState.Chatty_service.getLastMessage(GlobalState.newConnectedUser);
             if (GlobalState.newConnectedUser != null) {
                 Status s = GlobalState.Chatty_service.getStatus(GlobalState.newConnectedUser);
                 s.setActive(1);
                 GlobalState.Chatty_service.editNewStatus(s);
             }
             allMessages = GlobalState.Chatty_service.getMessages();
+            allMessages = allMessages.stream().filter(msg -> !"admin".equals(msg.getPostBy().getUsername())).collect(Collectors.toList());
             
             friends_list.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 1) { try {
-                    GlobalState.lastMessage.setMessage(allMessages.get(allMessages.size()-1));
-                    GlobalState.Chatty_service.editLastMessage(GlobalState.lastMessage);
-                    active_status.setVisible(true);
-                    // Un clic
-                    ObservableList<HBox> selectedItems = friends_list.getSelectionModel().getSelectedItems();
-                    GlobalState.currentDiscussingFriend = friendsHbox.get(selectedItems.get(0));
-                    GlobalState.lastMessage = GlobalState.Chatty_service.getLastMessage(GlobalState.currentDiscussingFriend);
-                    profile_img2.setImage(((ImageView) selectedItems.get(0).getChildren().get(0)).getImage());
-                    profile_name.setText(((Label) selectedItems.get(0).getChildren().get(1)).getText());
-                    if (!friendsHbox.containsKey(selectedItems.get(0))) {
-                        friendsHbox.put(selectedItems.get(0), GlobalState.currentDiscussingFriend);
+                if (event.getClickCount() == 1) {
+                    if (GlobalState.lastMessage != null) {
+                        try {
+                            GlobalState.Chatty_service.editLastMessage(GlobalState.lastMessage);
+                        } catch (RemoteException ex) {
+                            Logger.getLogger(HomeController.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
-                    if (oldFriendSelected != null && !Objects.equals(GlobalState.currentDiscussingFriend.getId(), oldFriendSelected.getId())) {
-                        load_messages();
+                    try {
+                        active_status.setVisible(true);
+                        // Un clic
+                        ObservableList<HBox> selectedItems = friends_list.getSelectionModel().getSelectedItems();
+                        GlobalState.currentDiscussingFriend = friendsHbox.get(selectedItems.get(0));
+                        if (GlobalState.Chatty_service.getLastMessage(GlobalState.newConnectedUser, GlobalState.currentDiscussingFriend) == null) {
+                            GlobalState.Chatty_service.createNewLastMessage(new LastMessage(GlobalState.newConnectedUser, GlobalState.currentDiscussingFriend, GlobalState.Chatty_service.getMessageByPoster(GlobalState.Chatty_service.getClient("admin"))));
+                        }
+                        GlobalState.lastMessage = GlobalState.Chatty_service.getLastMessage(GlobalState.newConnectedUser, GlobalState.currentDiscussingFriend);
+                        profile_img2.setImage(((ImageView) selectedItems.get(0).getChildren().get(0)).getImage());
+                        profile_name.setText(((Label) selectedItems.get(0).getChildren().get(1)).getText());
+                        if (!friendsHbox.containsKey(selectedItems.get(0))) {
+                            friendsHbox.put(selectedItems.get(0), GlobalState.currentDiscussingFriend);
+                        }
+                        if (oldFriendSelected != null && !Objects.equals(GlobalState.currentDiscussingFriend.getId(), oldFriendSelected.getId())) {
+                            load_messages();
+                        }
+                        oldFriendSelected = GlobalState.currentDiscussingFriend;
+                    } catch (RemoteException ex) {
+                        Logger.getLogger(HomeController.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    oldFriendSelected = GlobalState.currentDiscussingFriend;
-                } catch (RemoteException ex) {
-                    Logger.getLogger(HomeController.class.getName()).log(Level.SEVERE, null, ex);
-                }
                 }
             });
             
@@ -146,14 +158,17 @@ public class HomeController implements Initializable {
                         Status s = GlobalState.Chatty_service.getStatus(GlobalState.newConnectedUser);
                         s.setActive(0);
                         GlobalState.Chatty_service.editNewStatus(s);
-                        GlobalState.lastMessage.setMessage(allMessages.get(allMessages.size()-1));
-                        GlobalState.Chatty_service.editLastMessage(GlobalState.lastMessage);
+                        if (!allMessages.isEmpty()) {
+                            GlobalState.lastMessage.setMessage(allMessages.get(allMessages.size()-1));
+                            GlobalState.Chatty_service.editLastMessage(GlobalState.lastMessage);
+                        }
                         timer.cancel();
                     } catch (RemoteException ex) {
                         Logger.getLogger(HomeController.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             });
+                msg_conversation.setItems(messagesViewData);
             } catch (RemoteException ex) {
                 Logger.getLogger(HomeController.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -171,8 +186,10 @@ public class HomeController implements Initializable {
                     Status s = GlobalState.Chatty_service.getStatus(GlobalState.newConnectedUser);
                     s.setActive(0);
                     GlobalState.Chatty_service.editNewStatus(s);
-                    GlobalState.lastMessage.setMessage(allMessages.get(allMessages.size()-1));
-                    GlobalState.Chatty_service.editLastMessage(GlobalState.lastMessage);
+                    if (!allMessages.isEmpty()) {
+                        GlobalState.lastMessage.setMessage(allMessages.get(allMessages.size()-1));
+                        GlobalState.Chatty_service.editLastMessage(GlobalState.lastMessage);
+                    }
                     swicth_scene("/chatty/views/Connexion_page.fxml");
                 } catch (BackingStoreException ex) {
                     Logger.getLogger(HomeController.class.getName()).log(Level.SEVERE, null, ex);
@@ -193,17 +210,14 @@ public class HomeController implements Initializable {
 
     @FXML
     private void send_msg(ActionEvent event) throws RemoteException {
-        Date currentDate = new Date();
-        Message message = new Message(msg_field.getText(), currentDate, GlobalState.currentDiscussingFriend, GlobalState.newConnectedUser);
+        currentSendedMessageDate = new Date();
+        Message message = new Message(msg_field.getText(), currentSendedMessageDate, GlobalState.currentDiscussingFriend, GlobalState.newConnectedUser);
         if (GlobalState.Chatty_service.sendMsgClientToClient(message)) {
-            allMessages.add(GlobalState.Chatty_service.getMessageByDate(currentDate));
-            messagesByFrien.get(GlobalState.currentDiscussingFriend).add(message);
-            add_new_message_to_conversation(message);
-            GlobalState.lastMessage.setMessage(allMessages.get(allMessages.size()-1));
-            System.out.println("message sent !");
+            allMessages.add(GlobalState.Chatty_service.getMessageByDate(currentSendedMessageDate));
+            msg_field.clear();
             return;
         }
-        System.out.println("message not sent !");
+        dialogs.error("Error", "Error", "message non envoyé !");
         msg_field.clear();
     }
     
@@ -226,15 +240,13 @@ public class HomeController implements Initializable {
     }
     
     void load_messages() throws RemoteException{
-        if (!messagesByFrien.containsKey(GlobalState.currentDiscussingFriend)) {
-            messagesByFrien.put(GlobalState.currentDiscussingFriend, get_messages_between_me_and_firend(allMessages));
-        }
+        messagesByFrien.clear();
+        messagesByFrien.put(GlobalState.currentDiscussingFriend, get_messages_between_me_and_firend(allMessages));
         
         messagesViewData.clear();
         for (Message message : messagesByFrien.get(GlobalState.currentDiscussingFriend)) {
             add_new_message_to_conversation(message);
-        };
-        msg_conversation.setItems(messagesViewData);
+        }
     }
     
     void add_new_message_to_conversation(Message message){
@@ -281,16 +293,19 @@ public class HomeController implements Initializable {
     }
     
     void add_last_message_to_conv() throws RemoteException{
-        List<Message> messages = GlobalState.Chatty_service.getMessagesAfter(GlobalState.lastMessage.getMessage().getPostAt());
-        List<Message> messages_betwee_me_and_friend = get_messages_between_me_and_firend(messages);
-        for (Message message : messages_betwee_me_and_friend) {
-            add_new_message_to_conversation(message);
+        if (GlobalState.lastMessage != null) {
+            List<Message> messages = GlobalState.Chatty_service.getMessagesAfter(GlobalState.lastMessage.getMessage().getId());
+            List<Message> messages_betwee_me_and_friend = get_messages_between_me_and_firend(messages);
+            for (Message message : messages_betwee_me_and_friend) {
+                if (message.getPostAt() != currentSendedMessageDate) {
+                    add_new_message_to_conversation(message);
+                }
+            }
+            allMessages.addAll(messages_betwee_me_and_friend);
+            if (!allMessages.isEmpty()) {
+                GlobalState.lastMessage.setMessage(allMessages.get(allMessages.size()-1));
+            }
         }
-        if (messagesByFrien.containsKey(GlobalState.currentDiscussingFriend)) {
-            messagesByFrien.get(GlobalState.currentDiscussingFriend).addAll(messages_betwee_me_and_friend);
-        }
-        allMessages.addAll(messages_betwee_me_and_friend);
-        GlobalState.lastMessage.setMessage(allMessages.get(allMessages.size()-1));
     }
     
     List<Message> get_messages_between_me_and_firend(List<Message> messages){
@@ -298,6 +313,20 @@ public class HomeController implements Initializable {
         for (Message message : messages) {
             if ((Objects.equals(message.getPostFor().getId(), GlobalState.currentDiscussingFriend.getId()) && Objects.equals(message.getPostBy().getId(), GlobalState.newConnectedUser.getId())) || (Objects.equals(message.getPostBy().getId(), GlobalState.currentDiscussingFriend.getId()) && Objects.equals(message.getPostFor().getId(), GlobalState.newConnectedUser.getId()))) {
                 l.add(message);
+            }
+        }
+        return l;
+    }
+    
+    List<Message> order_messages_by_id(List<Message> l){
+        if (l.size() != 0) {
+            Message i = l.get(0);
+            for (int j = 1; j < l.size(); j++) {
+                if (l.get(j).getId() < i.getId()) {
+                    Message tmp = i;
+                    i = l.get(j);
+                    l.set(j, tmp);
+                }
             }
         }
         return l;

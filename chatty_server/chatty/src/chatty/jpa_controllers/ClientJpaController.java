@@ -45,6 +45,9 @@ public class ClientJpaController implements Serializable {
         if (client.getLastMessageList() == null) {
             client.setLastMessageList(new ArrayList<LastMessage>());
         }
+        if (client.getLastMessageList1() == null) {
+            client.setLastMessageList1(new ArrayList<LastMessage>());
+        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -67,6 +70,12 @@ public class ClientJpaController implements Serializable {
                 attachedLastMessageList.add(lastMessageListLastMessageToAttach);
             }
             client.setLastMessageList(attachedLastMessageList);
+            List<LastMessage> attachedLastMessageList1 = new ArrayList<LastMessage>();
+            for (LastMessage lastMessageList1LastMessageToAttach : client.getLastMessageList1()) {
+                lastMessageList1LastMessageToAttach = em.getReference(lastMessageList1LastMessageToAttach.getClass(), lastMessageList1LastMessageToAttach.getId());
+                attachedLastMessageList1.add(lastMessageList1LastMessageToAttach);
+            }
+            client.setLastMessageList1(attachedLastMessageList1);
             em.persist(client);
             for (Message messageListMessage : client.getMessageList()) {
                 Client oldPostForOfMessageListMessage = messageListMessage.getPostFor();
@@ -87,12 +96,21 @@ public class ClientJpaController implements Serializable {
                 }
             }
             for (LastMessage lastMessageListLastMessage : client.getLastMessageList()) {
-                Client oldOwnerLastMessageOfLastMessageListLastMessage = lastMessageListLastMessage.getOwnerLastMessage();
-                lastMessageListLastMessage.setOwnerLastMessage(client);
+                Client oldOwner2OfLastMessageListLastMessage = lastMessageListLastMessage.getOwner2();
+                lastMessageListLastMessage.setOwner2(client);
                 lastMessageListLastMessage = em.merge(lastMessageListLastMessage);
-                if (oldOwnerLastMessageOfLastMessageListLastMessage != null) {
-                    oldOwnerLastMessageOfLastMessageListLastMessage.getLastMessageList().remove(lastMessageListLastMessage);
-                    oldOwnerLastMessageOfLastMessageListLastMessage = em.merge(oldOwnerLastMessageOfLastMessageListLastMessage);
+                if (oldOwner2OfLastMessageListLastMessage != null) {
+                    oldOwner2OfLastMessageListLastMessage.getLastMessageList().remove(lastMessageListLastMessage);
+                    oldOwner2OfLastMessageListLastMessage = em.merge(oldOwner2OfLastMessageListLastMessage);
+                }
+            }
+            for (LastMessage lastMessageList1LastMessage : client.getLastMessageList1()) {
+                Client oldOwner1OfLastMessageList1LastMessage = lastMessageList1LastMessage.getOwner1();
+                lastMessageList1LastMessage.setOwner1(client);
+                lastMessageList1LastMessage = em.merge(lastMessageList1LastMessage);
+                if (oldOwner1OfLastMessageList1LastMessage != null) {
+                    oldOwner1OfLastMessageList1LastMessage.getLastMessageList1().remove(lastMessageList1LastMessage);
+                    oldOwner1OfLastMessageList1LastMessage = em.merge(oldOwner1OfLastMessageList1LastMessage);
                 }
             }
             em.getTransaction().commit();
@@ -115,6 +133,8 @@ public class ClientJpaController implements Serializable {
             List<Message> messageList1New = client.getMessageList1();
             List<LastMessage> lastMessageListOld = persistentClient.getLastMessageList();
             List<LastMessage> lastMessageListNew = client.getLastMessageList();
+            List<LastMessage> lastMessageList1Old = persistentClient.getLastMessageList1();
+            List<LastMessage> lastMessageList1New = client.getLastMessageList1();
             List<String> illegalOrphanMessages = null;
             for (Message messageListOldMessage : messageListOld) {
                 if (!messageListNew.contains(messageListOldMessage)) {
@@ -137,7 +157,15 @@ public class ClientJpaController implements Serializable {
                     if (illegalOrphanMessages == null) {
                         illegalOrphanMessages = new ArrayList<String>();
                     }
-                    illegalOrphanMessages.add("You must retain LastMessage " + lastMessageListOldLastMessage + " since its ownerLastMessage field is not nullable.");
+                    illegalOrphanMessages.add("You must retain LastMessage " + lastMessageListOldLastMessage + " since its owner2 field is not nullable.");
+                }
+            }
+            for (LastMessage lastMessageList1OldLastMessage : lastMessageList1Old) {
+                if (!lastMessageList1New.contains(lastMessageList1OldLastMessage)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain LastMessage " + lastMessageList1OldLastMessage + " since its owner1 field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -164,6 +192,13 @@ public class ClientJpaController implements Serializable {
             }
             lastMessageListNew = attachedLastMessageListNew;
             client.setLastMessageList(lastMessageListNew);
+            List<LastMessage> attachedLastMessageList1New = new ArrayList<LastMessage>();
+            for (LastMessage lastMessageList1NewLastMessageToAttach : lastMessageList1New) {
+                lastMessageList1NewLastMessageToAttach = em.getReference(lastMessageList1NewLastMessageToAttach.getClass(), lastMessageList1NewLastMessageToAttach.getId());
+                attachedLastMessageList1New.add(lastMessageList1NewLastMessageToAttach);
+            }
+            lastMessageList1New = attachedLastMessageList1New;
+            client.setLastMessageList1(lastMessageList1New);
             client = em.merge(client);
             for (Message messageListNewMessage : messageListNew) {
                 if (!messageListOld.contains(messageListNewMessage)) {
@@ -189,12 +224,23 @@ public class ClientJpaController implements Serializable {
             }
             for (LastMessage lastMessageListNewLastMessage : lastMessageListNew) {
                 if (!lastMessageListOld.contains(lastMessageListNewLastMessage)) {
-                    Client oldOwnerLastMessageOfLastMessageListNewLastMessage = lastMessageListNewLastMessage.getOwnerLastMessage();
-                    lastMessageListNewLastMessage.setOwnerLastMessage(client);
+                    Client oldOwner2OfLastMessageListNewLastMessage = lastMessageListNewLastMessage.getOwner2();
+                    lastMessageListNewLastMessage.setOwner2(client);
                     lastMessageListNewLastMessage = em.merge(lastMessageListNewLastMessage);
-                    if (oldOwnerLastMessageOfLastMessageListNewLastMessage != null && !oldOwnerLastMessageOfLastMessageListNewLastMessage.equals(client)) {
-                        oldOwnerLastMessageOfLastMessageListNewLastMessage.getLastMessageList().remove(lastMessageListNewLastMessage);
-                        oldOwnerLastMessageOfLastMessageListNewLastMessage = em.merge(oldOwnerLastMessageOfLastMessageListNewLastMessage);
+                    if (oldOwner2OfLastMessageListNewLastMessage != null && !oldOwner2OfLastMessageListNewLastMessage.equals(client)) {
+                        oldOwner2OfLastMessageListNewLastMessage.getLastMessageList().remove(lastMessageListNewLastMessage);
+                        oldOwner2OfLastMessageListNewLastMessage = em.merge(oldOwner2OfLastMessageListNewLastMessage);
+                    }
+                }
+            }
+            for (LastMessage lastMessageList1NewLastMessage : lastMessageList1New) {
+                if (!lastMessageList1Old.contains(lastMessageList1NewLastMessage)) {
+                    Client oldOwner1OfLastMessageList1NewLastMessage = lastMessageList1NewLastMessage.getOwner1();
+                    lastMessageList1NewLastMessage.setOwner1(client);
+                    lastMessageList1NewLastMessage = em.merge(lastMessageList1NewLastMessage);
+                    if (oldOwner1OfLastMessageList1NewLastMessage != null && !oldOwner1OfLastMessageList1NewLastMessage.equals(client)) {
+                        oldOwner1OfLastMessageList1NewLastMessage.getLastMessageList1().remove(lastMessageList1NewLastMessage);
+                        oldOwner1OfLastMessageList1NewLastMessage = em.merge(oldOwner1OfLastMessageList1NewLastMessage);
                     }
                 }
             }
@@ -247,7 +293,14 @@ public class ClientJpaController implements Serializable {
                 if (illegalOrphanMessages == null) {
                     illegalOrphanMessages = new ArrayList<String>();
                 }
-                illegalOrphanMessages.add("This Client (" + client + ") cannot be destroyed since the LastMessage " + lastMessageListOrphanCheckLastMessage + " in its lastMessageList field has a non-nullable ownerLastMessage field.");
+                illegalOrphanMessages.add("This Client (" + client + ") cannot be destroyed since the LastMessage " + lastMessageListOrphanCheckLastMessage + " in its lastMessageList field has a non-nullable owner2 field.");
+            }
+            List<LastMessage> lastMessageList1OrphanCheck = client.getLastMessageList1();
+            for (LastMessage lastMessageList1OrphanCheckLastMessage : lastMessageList1OrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Client (" + client + ") cannot be destroyed since the LastMessage " + lastMessageList1OrphanCheckLastMessage + " in its lastMessageList1 field has a non-nullable owner1 field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
@@ -326,4 +379,5 @@ public class ClientJpaController implements Serializable {
         emf.close();
         return (!client.isEmpty() ? client.get(0) : null);
     }
+    
 }

@@ -67,18 +67,25 @@ public class Message implements Serializable {
         this.id = id;
     }
 
+    public Message(Integer id, Date postAt) {
+        this.id = id;
+        this.postAt = postAt;
+    }
+
+    public Message(String content, Date postAt, Integer id, Client postFor, Client postBy, List<LastMessage> lastMessageList) {
+        this.content = content;
+        this.postAt = postAt;
+        this.id = id;
+        this.postFor = postFor;
+        this.postBy = postBy;
+        this.lastMessageList = lastMessageList;
+    }
+    
     public Message(String content, Date postAt, Client postFor, Client postBy) {
         this.content = content;
         this.postAt = postAt;
         this.postFor = postFor;
         this.postBy = postBy;
-    }
-    
-    
-
-    public Message(Integer id, Date postAt) {
-        this.id = id;
-        this.postAt = postAt;
     }
 
     public String getContent() {

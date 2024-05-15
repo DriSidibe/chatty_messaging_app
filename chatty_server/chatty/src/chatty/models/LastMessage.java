@@ -36,9 +36,12 @@ public class LastMessage implements Serializable {
     @Basic(optional = false)
     @Column(name = "ID")
     private Integer id;
-    @JoinColumn(name = "OWNER_LAST_MESSAGE", referencedColumnName = "ID")
+    @JoinColumn(name = "OWNER_2", referencedColumnName = "ID")
     @ManyToOne(optional = false)
-    private Client ownerLastMessage;
+    private Client owner2;
+    @JoinColumn(name = "OWNER_1", referencedColumnName = "ID")
+    @ManyToOne(optional = false)
+    private Client owner1;
     @JoinColumn(name = "MESSAGE", referencedColumnName = "ID")
     @ManyToOne(optional = false)
     private Message message;
@@ -54,23 +57,30 @@ public class LastMessage implements Serializable {
         return id;
     }
 
-    public LastMessage(Client ownerLastMessage, Message message) {
-        this.ownerLastMessage = ownerLastMessage;
+    public LastMessage(Client owner2, Client owner1, Message message) {
+        this.owner2 = owner2;
+        this.owner1 = owner1;
         this.message = message;
     }
-    
-    
 
     public void setId(Integer id) {
         this.id = id;
     }
 
-    public Client getOwnerLastMessage() {
-        return ownerLastMessage;
+    public Client getOwner2() {
+        return owner2;
     }
 
-    public void setOwnerLastMessage(Client ownerLastMessage) {
-        this.ownerLastMessage = ownerLastMessage;
+    public void setOwner2(Client owner2) {
+        this.owner2 = owner2;
+    }
+
+    public Client getOwner1() {
+        return owner1;
+    }
+
+    public void setOwner1(Client owner1) {
+        this.owner1 = owner1;
     }
 
     public Message getMessage() {

@@ -5,6 +5,8 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -68,6 +70,23 @@
                   <Label fx:id="register_link" alignment="CENTER" onMouseClicked="#swicth_scene_to_signup" prefHeight="17.0" style="-fx-cursor: pointer;" text="Inscrivez vous !" textFill="#1d12f5" />
                </children>
             </HBox>
+            <VBox alignment="BOTTOM_RIGHT" VBox.vgrow="ALWAYS">
+               <padding>
+                  <Insets bottom="20.0" right="20.0" />
+               </padding>
+            </VBox>
+            <VBox alignment="BOTTOM_RIGHT" layoutX="10.0" layoutY="89.0">
+               <children>
+                  <ImageView fx:id="loading_img" fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                     <image>
+                        <Image url="@../static/images/loading.gif" />
+                     </image>
+                  </ImageView>
+               </children>
+               <padding>
+                  <Insets bottom="20.0" right="20.0" />
+               </padding>
+            </VBox>
          </children>
       </VBox>
    </children>

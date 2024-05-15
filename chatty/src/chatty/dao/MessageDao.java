@@ -37,8 +37,8 @@ public class MessageDao {
         return messageJpaController.findMessage(date);
     }
     
-    public List<Message> get_Messages_after(Date date) {
-        return messageJpaController.findMessageEntities(date);
+    public List<Message> get_Messages_after(int id) {
+        return messageJpaController.findMessageEntities(id);
     }
     
     public Message get_Messages(Client client) {

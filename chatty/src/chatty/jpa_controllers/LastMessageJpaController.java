@@ -38,10 +38,15 @@ public class LastMessageJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Client ownerLastMessage = lastMessage.getOwnerLastMessage();
-            if (ownerLastMessage != null) {
-                ownerLastMessage = em.getReference(ownerLastMessage.getClass(), ownerLastMessage.getId());
-                lastMessage.setOwnerLastMessage(ownerLastMessage);
+            Client owner2 = lastMessage.getOwner2();
+            if (owner2 != null) {
+                owner2 = em.getReference(owner2.getClass(), owner2.getId());
+                lastMessage.setOwner2(owner2);
+            }
+            Client owner1 = lastMessage.getOwner1();
+            if (owner1 != null) {
+                owner1 = em.getReference(owner1.getClass(), owner1.getId());
+                lastMessage.setOwner1(owner1);
             }
             Message message = lastMessage.getMessage();
             if (message != null) {
@@ -49,9 +54,13 @@ public class LastMessageJpaController implements Serializable {
                 lastMessage.setMessage(message);
             }
             em.persist(lastMessage);
-            if (ownerLastMessage != null) {
-                ownerLastMessage.getLastMessageList().add(lastMessage);
-                ownerLastMessage = em.merge(ownerLastMessage);
+            if (owner2 != null) {
+                owner2.getLastMessageList().add(lastMessage);
+                owner2 = em.merge(owner2);
+            }
+            if (owner1 != null) {
+                owner1.getLastMessageList().add(lastMessage);
+                owner1 = em.merge(owner1);
             }
             if (message != null) {
                 message.getLastMessageList().add(lastMessage);
@@ -71,26 +80,40 @@ public class LastMessageJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             LastMessage persistentLastMessage = em.find(LastMessage.class, lastMessage.getId());
-            Client ownerLastMessageOld = persistentLastMessage.getOwnerLastMessage();
-            Client ownerLastMessageNew = lastMessage.getOwnerLastMessage();
+            Client owner2Old = persistentLastMessage.getOwner2();
+            Client owner2New = lastMessage.getOwner2();
+            Client owner1Old = persistentLastMessage.getOwner1();
+            Client owner1New = lastMessage.getOwner1();
             Message messageOld = persistentLastMessage.getMessage();
             Message messageNew = lastMessage.getMessage();
-            if (ownerLastMessageNew != null) {
-                ownerLastMessageNew = em.getReference(ownerLastMessageNew.getClass(), ownerLastMessageNew.getId());
-                lastMessage.setOwnerLastMessage(ownerLastMessageNew);
+            if (owner2New != null) {
+                owner2New = em.getReference(owner2New.getClass(), owner2New.getId());
+                lastMessage.setOwner2(owner2New);
+            }
+            if (owner1New != null) {
+                owner1New = em.getReference(owner1New.getClass(), owner1New.getId());
+                lastMessage.setOwner1(owner1New);
             }
             if (messageNew != null) {
                 messageNew = em.getReference(messageNew.getClass(), messageNew.getId());
                 lastMessage.setMessage(messageNew);
             }
             lastMessage = em.merge(lastMessage);
-            if (ownerLastMessageOld != null && !ownerLastMessageOld.equals(ownerLastMessageNew)) {
-                ownerLastMessageOld.getLastMessageList().remove(lastMessage);
-                ownerLastMessageOld = em.merge(ownerLastMessageOld);
+            if (owner2Old != null && !owner2Old.equals(owner2New)) {
+                owner2Old.getLastMessageList().remove(lastMessage);
+                owner2Old = em.merge(owner2Old);
             }
-            if (ownerLastMessageNew != null && !ownerLastMessageNew.equals(ownerLastMessageOld)) {
-                ownerLastMessageNew.getLastMessageList().add(lastMessage);
-                ownerLastMessageNew = em.merge(ownerLastMessageNew);
+            if (owner2New != null && !owner2New.equals(owner2Old)) {
+                owner2New.getLastMessageList().add(lastMessage);
+                owner2New = em.merge(owner2New);
+            }
+            if (owner1Old != null && !owner1Old.equals(owner1New)) {
+                owner1Old.getLastMessageList().remove(lastMessage);
+                owner1Old = em.merge(owner1Old);
+            }
+            if (owner1New != null && !owner1New.equals(owner1Old)) {
+                owner1New.getLastMessageList().add(lastMessage);
+                owner1New = em.merge(owner1New);
             }
             if (messageOld != null && !messageOld.equals(messageNew)) {
                 messageOld.getLastMessageList().remove(lastMessage);
@@ -129,10 +152,15 @@ public class LastMessageJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The lastMessage with id " + id + " no longer exists.", enfe);
             }
-            Client ownerLastMessage = lastMessage.getOwnerLastMessage();
-            if (ownerLastMessage != null) {
-                ownerLastMessage.getLastMessageList().remove(lastMessage);
-                ownerLastMessage = em.merge(ownerLastMessage);
+            Client owner2 = lastMessage.getOwner2();
+            if (owner2 != null) {
+                owner2.getLastMessageList().remove(lastMessage);
+                owner2 = em.merge(owner2);
+            }
+            Client owner1 = lastMessage.getOwner1();
+            if (owner1 != null) {
+                owner1.getLastMessageList().remove(lastMessage);
+                owner1 = em.merge(owner1);
             }
             Message message = lastMessage.getMessage();
             if (message != null) {
@@ -194,15 +222,18 @@ public class LastMessageJpaController implements Serializable {
         }
     }
     
-    public LastMessage findLastMessage(Client client) {
+    public LastMessage findLastMessage(Client client1, Client client2) {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("chattyPU");
         EntityManager em = emf.createEntityManager();
 
         em.getTransaction().begin();
 
         // Création et exécution d'une requête SQL native personnalisée
-        Query query = em.createNativeQuery("SELECT * FROM LAST_MESSAGE WHERE OWNER_LAST_MESSAGE = ?", LastMessage.class);
-        query.setParameter(1, client.getId());
+        Query query = em.createNativeQuery("SELECT * FROM LAST_MESSAGE WHERE (OWNER_1 = ? AND owner_2 = ?) OR (OWNER_2 = ? AND owner_1 = ?)", LastMessage.class);
+        query.setParameter(1, client1.getId());
+        query.setParameter(2, client2.getId());
+        query.setParameter(3, client1.getId());
+        query.setParameter(4, client2.getId());
 
         // Récupération des résultats de la requête
         List<LastMessage> lastMessage = query.getResultList();

@@ -4,9 +4,7 @@
  */
 package chatty.controllers;
 
-import chatty.dao.StatusDao;
 import chatty.models.Client;
-import chatty.models.LastMessage;
 import chatty.models.Message;
 import chatty.models.Status;
 import chatty.my_classes.GlobalState;
@@ -21,14 +19,15 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 /**
@@ -47,7 +46,7 @@ public class Signup_pageController implements Initializable {
     @FXML
     private TextField ins_passeword;
     @FXML
-    private Label signin_link;
+    private ImageView loading_gif;
     
     Registry registry;
     Chatty_service_interface Chatty_service = null;
@@ -55,34 +54,41 @@ public class Signup_pageController implements Initializable {
     
     @FXML
     void signup_user() throws RemoteException{
-        if (GlobalState.Chatty_service.getClient(ins_username.getText()) != null) {
-            dialogs.error("Erreur", "Enregistrement utilisateur", "cet utilisateur exist deja !").showAndWait();
-            return;
-        }
-        if (GlobalState.Chatty_service.getClient("admin") == null) {
-            GlobalState.Chatty_service.createClient(new Client("", "", "admin", ""));
-        }
-        Message msg = null;
-        if (GlobalState.Chatty_service.getMessageByPoster(GlobalState.Chatty_service.getClient("admin")) == null) {
-            Client admin = GlobalState.Chatty_service.getClient("admin");
-            msg = new Message("", new Date(), admin, admin);
-            GlobalState.Chatty_service.sendMsgClientToClient(msg);
-        }
-        Client nc = new Client(ins_firstname.getText(), ins_lastnae.getText(), ins_username.getText(), ins_passeword.getText());
-        GlobalState.Chatty_service.createClient(nc);
-        GlobalState.Chatty_service.createNewLastMessage(new LastMessage(GlobalState.Chatty_service.getClient(ins_username.getText()), GlobalState.Chatty_service.getMessageByPoster(GlobalState.Chatty_service.getClient("admin"))));
-        StatusDao sd = new StatusDao();
-        if (GlobalState.Chatty_service.getStatus(GlobalState.Chatty_service.getClient(ins_username.getText())) == null) {
-            Status ns = new Status(0, GlobalState.Chatty_service.getClient(ins_username.getText()));
-            GlobalState.Chatty_service.createNewStatus(ns);
-        }
-        if (GlobalState.Chatty_service.getClient(ins_username.getText()) != null) {
-            dialogs.information("Info", "Info utilisateur", "compte cré avec succès !").showAndWait();
+        Platform.runLater(() -> loading_gif.setVisible(true));
+        if (!"".equals(ins_username.getText())) {
+            if (GlobalState.Chatty_service.getClient(ins_username.getText()) != null) {
+                Platform.runLater(() -> loading_gif.setVisible(false));
+                dialogs.error("Erreur", "Enregistrement utilisateur", "cet utilisateur exist deja !").showAndWait();
+                return;
+            }
+            if (GlobalState.Chatty_service.getClient("admin") == null) {
+                GlobalState.Chatty_service.createClient(new Client("", "", "admin", ""));
+            }
+            Message msg = null;
+            if (GlobalState.Chatty_service.getMessageByPoster(GlobalState.Chatty_service.getClient("admin")) == null) {
+                Client admin = GlobalState.Chatty_service.getClient("admin");
+                msg = new Message("", new Date(), admin, admin);
+                GlobalState.Chatty_service.sendMsgClientToClient(msg);
+            }
+            Client nc = new Client(ins_firstname.getText(), ins_lastnae.getText(), ins_username.getText(), ins_passeword.getText());
+            GlobalState.Chatty_service.createClient(nc);
+            if (GlobalState.Chatty_service.getStatus(GlobalState.Chatty_service.getClient(ins_username.getText())) == null) {
+                Status ns = new Status(0, GlobalState.Chatty_service.getClient(ins_username.getText()));
+                GlobalState.Chatty_service.createNewStatus(ns);
+            }
+            if (GlobalState.Chatty_service.getClient(ins_username.getText()) != null) {
+                Platform.runLater(() -> loading_gif.setVisible(false));
+                dialogs.information("Info", "Info utilisateur", "compte cré avec succès !").showAndWait();
+            }else{
+                Platform.runLater(() -> loading_gif.setVisible(false));
+                dialogs.information("Info", "Info utilisateur", "erreur peandant la création !").showAndWait();
+                return;
+            }
+            swicth_scene("/chatty/views/Connexion_page.fxml");
         }else{
-            dialogs.information("Info", "Info utilisateur", "erreur peandant la création !").showAndWait();
-            return;
+            Platform.runLater(() -> loading_gif.setVisible(false));
+            dialogs.error("Erreur", "Enregistrement utilisateur", "le nom d'utilisateur ne peut pas etre vide !").showAndWait();
         }
-        swicth_scene("/chatty/views/Connexion_page.fxml");
     }
     
     @FXML

@@ -141,9 +141,9 @@ public class Chatty_service_implementation extends UnicastRemoteObject implement
     }
 
     @Override
-    public LastMessage getLastMessage(Client client) throws RemoteException {
+    public LastMessage getLastMessage(Client client1, Client client2) throws RemoteException {
         LastMessageDao sd = new LastMessageDao();
-        return sd.getLastMessage(client);
+        return sd.getLastMessage(client1, client2);
     }
 
     @Override
@@ -153,9 +153,9 @@ public class Chatty_service_implementation extends UnicastRemoteObject implement
     }
 
     @Override
-    public List<Message> getMessagesAfter(Date date) throws RemoteException {
+    public List<Message> getMessagesAfter(int id) throws RemoteException {
         MessageDao ud = new MessageDao();
-        return ud.get_Messages_after(date);
+        return ud.get_Messages_after(id);
     }
 
     @Override

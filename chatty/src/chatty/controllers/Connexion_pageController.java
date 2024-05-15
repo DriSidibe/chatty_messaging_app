@@ -5,18 +5,17 @@
 package chatty.controllers;
 
 import chatty.models.Client;
-import chatty.models.Status;
 import chatty.my_classes.GlobalState;
 import chatty.my_classes.helpers.dialogs;
 import java.io.IOException;
 import java.net.URL;
 import java.rmi.RemoteException;
-import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+import javafx.application.Platform;
 import javafx.fxml.Initializable;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,6 +24,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 
@@ -45,12 +45,15 @@ public class Connexion_pageController implements Initializable {
     private Label register_link;
     @FXML
     private CheckBox stay_connected_button;
+    @FXML
+    private ImageView loading_img;
     
     private final Preferences prefs = Preferences.userRoot().node("chatty");
     boolean stayConnected = false;
     
     @FXML
     void connect_user() throws BackingStoreException, RemoteException{
+        Platform.runLater(() -> loading_img.setVisible(true));
         if (!"".equals(username.getText()) || !"".equals(password.getText())) {
             Client newConnectedUser = GlobalState.Chatty_service.getClient(username.getText(), password.getText());
             if (GlobalState.Chatty_service.logClient(newConnectedUser)) {
@@ -72,6 +75,7 @@ public class Connexion_pageController implements Initializable {
                 return;
             }
         }
+        Platform.runLater(() -> loading_img.setVisible(false));
         dialogs.error("Info utilisateur", "Existence utilisateur", "Les donnés entrées sont incorrectent !").showAndWait();
     }
     
