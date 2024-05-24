@@ -8,7 +8,7 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="chatty.jar" size="347491" download="eager" />
+    <jar href="chatty.jar" size="347615" download="eager" />
     <jar href="lib\derby.jar" size="3232770" download="eager" />
     <jar href="lib\jakarta.persistence-2.2.3.jar" size="173811" download="eager" />
     <jar href="lib\org.eclipse.persistence.antlr-2.7.10.jar" size="147580" download="eager" />

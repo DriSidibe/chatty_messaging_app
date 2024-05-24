@@ -8,6 +8,7 @@ import chatty.models.Client;
 import chatty.models.LastMessage;
 import chatty.service.Chatty_service_interface;
 import java.rmi.registry.Registry;
+import java.util.logging.Logger;
 import javafx.stage.Stage;
 
 /**
@@ -23,4 +24,5 @@ public class GlobalState {
     public static Client currentDiscussingFriend = null;
     public static Stage currentStage = null;
     public static LastMessage lastMessage = null;
+    public static Logger myLogger = null;
 }

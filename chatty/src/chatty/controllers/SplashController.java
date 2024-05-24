@@ -37,7 +37,7 @@ public class SplashController implements Initializable {
     private Label info_msg;
     private final Preferences prefs = Preferences.userRoot().node("chatty");
     
-    String server = System.getenv("chattyServer");;
+    String server = System.getenv("chattyServer");
     int port = 1099;
     int retryWaitTime = 2000;
     boolean isConnectionToServerOk = false;
@@ -70,7 +70,7 @@ public class SplashController implements Initializable {
                 GlobalState.registry = LocateRegistry.getRegistry(server, port);
                 GlobalState.Chatty_service = (Chatty_service_interface) GlobalState.registry.lookup("Chatty_service");
             } catch (Exception e) {
-                System.out.println(e.toString());
+                GlobalState.myLogger.info(e.toString());
                 return; // Exit early if connection fails
             }
             isConnectionToServerOk = true;
@@ -97,7 +97,6 @@ public class SplashController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
         // Add event handler to update UI when the task completes
         connectionToServerService.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override

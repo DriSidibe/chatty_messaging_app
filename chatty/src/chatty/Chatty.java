@@ -4,6 +4,7 @@
  */
 package chatty;
 
+import chatty.my_classes.GlobalState;
 import java.io.IOException;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -38,6 +39,7 @@ public class Chatty extends Application {
         FileHandler logFile = new FileHandler(System.getenv("USERPROFILE")+"\\chatty.log");
         Logger myLogger = Logger.getLogger(Chatty.class.getName());
         myLogger.addHandler(logFile);
+        GlobalState.myLogger = myLogger;
         try {
             launch(args);
         } catch (Exception e) {
